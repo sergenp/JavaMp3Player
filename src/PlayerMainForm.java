@@ -1,5 +1,11 @@
+import javazoom.jlgui.basicplayer.BasicPlayer;
+import javazoom.jlgui.basicplayer.BasicPlayerException;
+
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.File;
 import java.util.HashMap;
 
 public class PlayerMainForm {
@@ -11,27 +17,89 @@ public class PlayerMainForm {
     private JList<String> list1;
     private JButton loadMusicButton;
     private HashMap<String, String> musicList = new HashMap<>();
+    private BasicPlayer player;
 
     public PlayerMainForm() {
+        player = new BasicPlayer();
         // add an action listener listening if you clicked the button, and once u clicked the loadMusicButton,
         // call chooseMusicFiles function
         loadMusicButton.addActionListener(e -> chooseMusicFiles());
+        playButton.addActionListener(e -> {
+            try {
+                playSound();
+                // just in case we paused a song and decided to play another
+                pauseButton.setText("Pause");
+            } catch (BasicPlayerException ex) {
+                ex.printStackTrace();
+            }
+        });
+        pauseButton.addActionListener(e -> {
+            try {
+                // status 0 is playing status, smfh use enums for god's sake
+                // so if playing, stop it, make the button string resume
+                if (player.getStatus() == 0) {
+                    pauseButton.setText("Resume");
+                    player.pause();
+                }
+                // you guessed right, paused status is 1!
+                else if (player.getStatus() == 1) {
+                    pauseButton.setText("Pause");
+                    player.resume();
+                }
+            } catch (BasicPlayerException ex) {
+                ex.printStackTrace();
+            }
+        });
+        nextButton.addActionListener(e ->
+        {
+            if (list1.getSelectedIndex() < list1.getModel().getSize()) {
+                list1.setSelectedIndex(list1.getSelectedIndex() + 1);
+            } else {
+                list1.setSelectedIndex(0);
+            }
+            try {
+                pauseButton.setText("Pause");
+                playSound();
+            } catch (BasicPlayerException ex) {
+                ex.printStackTrace();
+            }
+        });
+
+        list1.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent evt) {
+                if (evt.getClickCount() >= 2 && evt.getButton() == MouseEvent.BUTTON1) {
+                    try {
+                        playSound();
+                    } catch (BasicPlayerException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        // TODO
+        // add a font select menu to chance font
+        list1.setFont(new Font("Arial", Font.PLAIN, 16));
         // give our JFrame the title of Mp3 Player
         frame = new JFrame("Mp3 Player");
         // set the main content panel to mainPanel
         frame.setContentPane(mainPanel);
         // when you close the JFrame, exit the application
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        // gives our frame a default height and width, if you remove this you will get a 1x1 jframe rather than a stretched jframe
-        frame.pack();
+        frame.setSize(400, 400);
+        // center the frame
+        frame.setLocationRelativeTo(null);
     }
 
     public static void main(String[] args) {
         PlayerMainForm playerMainForm = new PlayerMainForm();
         playerMainForm.frame.setVisible(true);
+        //playerMainForm.frame.set
     }
 
+    //TODO
+    //make it so that selecting music files adds to the current musicList rather than recreating it
     public void chooseMusicFiles() {
+
         // create a select file dialog
         FileDialog dialog = new FileDialog(new Frame(), "Select Music File(s) to add", FileDialog.LOAD);
         dialog.setMultipleMode(true);
@@ -49,6 +117,21 @@ public class PlayerMainForm {
         }
         // set the model to the model we have created
         list1.setModel(listModel);
+        try {
+            list1.setSelectedIndex(0);
+            playSound();
+        } catch (BasicPlayerException e) {
+            e.printStackTrace();
+        }
+        frame.pack();
     }
 
+    public void playSound() throws BasicPlayerException {
+        File f = new File(musicList.get(list1.getSelectedValue()));
+        player.open(f);
+        player.play();
+        // TODO
+        // create a slider for the adjusting the music's volume
+        player.setGain(0.2);
+    }
 }
