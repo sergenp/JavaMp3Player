@@ -19,6 +19,9 @@ public class PlayerMainForm {
     private HashMap<String, String> musicList = new HashMap<>();
     private BasicPlayer player;
 
+    // TODO
+    // add a thread that checks if the player is stopped playing and make it play the next song
+    // add a shuffle checkbox, if it gets checked, next song will be a random song other than the next following song
     public PlayerMainForm() {
         player = new BasicPlayer();
         // add an action listener listening if you clicked the button, and once u clicked the loadMusicButton,
@@ -91,9 +94,14 @@ public class PlayerMainForm {
     }
 
     public static void main(String[] args) {
+        try {
+            // try to set the look of the UI to GTK+ which seems modern
+            UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
+            e.printStackTrace();
+        }
         PlayerMainForm playerMainForm = new PlayerMainForm();
         playerMainForm.frame.setVisible(true);
-        //playerMainForm.frame.set
     }
 
     //TODO
@@ -134,4 +142,5 @@ public class PlayerMainForm {
         // create a slider for the adjusting the music's volume
         player.setGain(0.2);
     }
+
 }
