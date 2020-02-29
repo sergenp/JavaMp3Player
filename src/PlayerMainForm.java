@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
+import java.util.HashMap;
 
 public class PlayerMainForm {
     private JFrame frame;
@@ -9,6 +10,7 @@ public class PlayerMainForm {
     private JButton nextButton;
     private JList<String> list1;
     private JButton loadMusicButton;
+    private HashMap<String, String> musicList = new HashMap<>();
 
     public PlayerMainForm() {
         // add an action listener listening if you clicked the button, and once u clicked the loadMusicButton,
@@ -42,14 +44,9 @@ public class PlayerMainForm {
         DefaultListModel<String> listModel = new DefaultListModel<>();
         // add every file path to the listModel
         for (var file : dialog.getFiles()) {
-            listModel.addElement(file.getAbsolutePath());
+            musicList.put(file.getName(), file.getAbsolutePath());
+            listModel.addElement(file.getName());
         }
-        // TODO @aren
-        // make it so we don't add every element to the listmodel, rather we add the name of the file,
-        // and when we click on the name of it, we get the absolute path to the file
-        // hint: make a Hashmap<String, String>, first parameter will be the name of the music, second parameter will be the path to it
-        // and our model will only show the "keys" of the hashmap, no need to implement the click functionality yet
-
         // set the model to the model we have created
         list1.setModel(listModel);
     }
