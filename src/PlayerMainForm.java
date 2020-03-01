@@ -7,6 +7,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.HashMap;
+import java.util.Random;
 
 public class PlayerMainForm {
     private JFrame frame;
@@ -16,12 +17,11 @@ public class PlayerMainForm {
     private JButton nextButton;
     private JList<String> list1;
     private JButton loadMusicButton;
+    private JCheckBox shuffleCheckBox;
     private HashMap<String, String> musicList = new HashMap<>();
     private BasicPlayer player;
 
-    // TODO
-    // add a thread that checks if the player is stopped playing and make it play the next song
-    // add a shuffle checkbox, if it gets checked, next song will be a random song other than the next following song
+
     public PlayerMainForm() {
         player = new BasicPlayer();
         // add an action listener listening if you clicked the button, and once u clicked the loadMusicButton,
@@ -53,20 +53,7 @@ public class PlayerMainForm {
                 ex.printStackTrace();
             }
         });
-        nextButton.addActionListener(e ->
-        {
-            if (list1.getSelectedIndex() < list1.getModel().getSize()) {
-                list1.setSelectedIndex(list1.getSelectedIndex() + 1);
-            } else {
-                list1.setSelectedIndex(0);
-            }
-            try {
-                pauseButton.setText("Pause");
-                playSound();
-            } catch (BasicPlayerException ex) {
-                ex.printStackTrace();
-            }
-        });
+        nextButton.addActionListener(e -> playNextSong());
 
         list1.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent evt) {
@@ -104,8 +91,6 @@ public class PlayerMainForm {
         playerMainForm.frame.setVisible(true);
     }
 
-    //TODO
-    //make it so that selecting music files adds to the current musicList rather than recreating it
     public void chooseMusicFiles() {
 
         // create a select file dialog
@@ -121,16 +106,15 @@ public class PlayerMainForm {
         // add every file path to the listModel
         for (var file : dialog.getFiles()) {
             musicList.put(file.getName(), file.getAbsolutePath());
-            listModel.addElement(file.getName());
         }
+
+        for (var musicName : musicList.keySet()) {
+            listModel.addElement(musicName);
+        }
+
         // set the model to the model we have created
         list1.setModel(listModel);
-        try {
-            list1.setSelectedIndex(0);
-            playSound();
-        } catch (BasicPlayerException e) {
-            e.printStackTrace();
-        }
+        list1.setSelectedIndex(0);
         frame.pack();
     }
 
@@ -141,6 +125,45 @@ public class PlayerMainForm {
         // TODO
         // create a slider for the adjusting the music's volume
         player.setGain(0.2);
+        createCheckerThread().start();
     }
 
+    public void playNextSong() {
+        int nextSongIndex = 0;
+        // if the checkbox enabled get a random song id from the list
+        if (shuffleCheckBox.isSelected()) {
+            nextSongIndex = new Random().nextInt(list1.getModel().getSize());
+        } else {
+            System.out.println(list1.getSelectedIndex());
+            if (list1.getSelectedIndex() + 1 < list1.getModel().getSize()) {
+                nextSongIndex = list1.getSelectedIndex() + 1;
+            }
+        }
+        list1.setSelectedIndex(nextSongIndex);
+        try {
+            pauseButton.setText("Pause");
+            playSound();
+        } catch (BasicPlayerException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    // Thread for checking if the song is stopped playing
+    public Thread createCheckerThread() {
+        return new Thread(() -> {
+            try {
+                Thread.sleep(5000);
+                while (true) {
+                    // check if the player is stopped playing
+                    if (player.getStatus() == 2) {
+                        // if it did play the next song
+                        this.playNextSong();
+                        break;
+                    }
+                    Thread.sleep(2000);
+                }
+            } catch (InterruptedException ignored) {
+            }
+        });
+    }
 }
