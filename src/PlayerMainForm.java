@@ -81,13 +81,13 @@ public class PlayerMainForm {
     }
 
     public static void main(String[] args) {
+        PlayerMainForm playerMainForm = new PlayerMainForm();
         try {
             // try to set the look of the UI to GTK+ which seems modern
-            UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
+            UIManager.setLookAndFeel(UIManager.getLookAndFeel());
+        } catch (UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }
-        PlayerMainForm playerMainForm = new PlayerMainForm();
         playerMainForm.frame.setVisible(true);
     }
 
