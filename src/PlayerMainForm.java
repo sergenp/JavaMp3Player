@@ -1,12 +1,15 @@
 import javazoom.jlgui.basicplayer.BasicPlayer;
 import javazoom.jlgui.basicplayer.BasicPlayerException;
 
+import javax.sound.sampled.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 public class PlayerMainForm {
@@ -18,8 +21,15 @@ public class PlayerMainForm {
     private JList<String> list1;
     private JButton loadMusicButton;
     private JCheckBox shuffleCheckBox;
+    private JSlider volumeSlider;
+    private JSlider songDurationSlider;
+    private JLabel secsLabel;
+    private JLabel minsLabel;
     private HashMap<String, String> musicList = new HashMap<>();
     private BasicPlayer player;
+    private double currentSongDuration;
+
+    private Thread soundDurationCheck;
 
 
     public PlayerMainForm() {
@@ -43,23 +53,33 @@ public class PlayerMainForm {
                 if (player.getStatus() == 0) {
                     pauseButton.setText("Resume");
                     player.pause();
+                    soundDurationCheck.interrupt();
                 }
                 // you guessed right, paused status is 1!
                 else if (player.getStatus() == 1) {
                     pauseButton.setText("Pause");
                     player.resume();
+                    soundDurationCheck = soundDurationSliderThread();
+                    soundDurationCheck.start();
                 }
             } catch (BasicPlayerException ex) {
                 ex.printStackTrace();
             }
         });
         nextButton.addActionListener(e -> playNextSong());
-
+        volumeSlider.addChangeListener(e -> {
+            try {
+                player.setGain((float) volumeSlider.getValue() / 100);
+            } catch (BasicPlayerException ex) {
+                ex.printStackTrace();
+            }
+        });
         list1.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent evt) {
                 if (evt.getClickCount() >= 2 && evt.getButton() == MouseEvent.BUTTON1) {
                     try {
                         playSound();
+                        pauseButton.setText("Pause");
                     } catch (BasicPlayerException e) {
                         e.printStackTrace();
                     }
@@ -88,6 +108,8 @@ public class PlayerMainForm {
         } catch (UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }
+        // remove the thick value from the slider
+        UIManager.put("Slider.paintValue", false);
         playerMainForm.frame.setVisible(true);
     }
 
@@ -111,20 +133,40 @@ public class PlayerMainForm {
         for (var musicName : musicList.keySet()) {
             listModel.addElement(musicName);
         }
-
         // set the model to the model we have created
         list1.setModel(listModel);
         list1.setSelectedIndex(0);
         frame.pack();
     }
 
+    public void setDuration(double duration) {
+        int secs = 0;
+        int mins = 0;
+        if (duration != 0) {
+            secs = (int) duration % 60;
+            mins = (int) duration / 60;
+        }
+        secsLabel.setText(String.valueOf(String.format("%02d", secs)));
+        minsLabel.setText(String.valueOf(mins));
+    }
+
     public void playSound() throws BasicPlayerException {
         File f = new File(musicList.get(list1.getSelectedValue()));
+        try {
+            currentSongDuration = getDurationOfSound(f);
+        } catch (UnsupportedAudioFileException | IOException e) {
+            e.printStackTrace();
+        }
+        setDuration(currentSongDuration);
+        if (soundDurationCheck != null) {
+            soundDurationCheck.interrupt();
+        }
+        soundDurationCheck = soundDurationSliderThread();
+        soundDurationCheck.start();
+        songDurationSlider.setMaximum((int) currentSongDuration);
         player.open(f);
         player.play();
-        // TODO
-        // create a slider for the adjusting the music's volume
-        player.setGain(0.2);
+        player.setGain((float) volumeSlider.getValue() / 100);
         createCheckerThread().start();
     }
 
@@ -152,7 +194,6 @@ public class PlayerMainForm {
     public Thread createCheckerThread() {
         return new Thread(() -> {
             try {
-                Thread.sleep(5000);
                 while (true) {
                     // check if the player is stopped playing
                     if (player.getStatus() == 2) {
@@ -163,7 +204,48 @@ public class PlayerMainForm {
                     Thread.sleep(2000);
                 }
             } catch (InterruptedException ignored) {
+
             }
         });
+    }
+
+    public Thread soundDurationSliderThread() {
+        return new Thread(() -> {
+            int atTime = 0;
+            while (currentSongDuration > 0) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    break;
+                }
+                atTime += 1;
+                currentSongDuration -= 1;
+                songDurationSlider.setValue(atTime);
+                setDuration(currentSongDuration);
+            }
+        });
+    }
+
+    private double getDurationOfSound(File file) throws UnsupportedAudioFileException, IOException {
+        AudioFileFormat fileFormat = AudioSystem.getAudioFileFormat(file);
+        System.out.println(fileFormat.getFormat().toString());
+        // if the given file is a mp3 file
+        if (fileFormat.getFormat().toString().startsWith("MPEG1L3")) {
+            Map<?, ?> properties = fileFormat.properties();
+            String key = "duration";
+            Long microseconds = (Long) properties.get(key);
+            // convert microseconds to seconds
+            return ((int) (microseconds / 1000000));
+        }
+        // if the given file is a .wav file
+        else if (fileFormat.getFormat().toString().startsWith("PCM")) {
+            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(file);
+            AudioFormat format = audioInputStream.getFormat();
+            long frames = audioInputStream.getFrameLength();
+            return (frames + 0.0) / format.getFrameRate();
+        } else {
+            throw new UnsupportedAudioFileException();
+        }
     }
 }

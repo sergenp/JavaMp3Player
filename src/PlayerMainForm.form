@@ -1,25 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="PlayerMainForm">
-  <grid id="27dc6" binding="mainPanel" layout-manager="GridLayoutManager" row-count="3" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+  <grid id="27dc6" binding="mainPanel" layout-manager="GridLayoutManager" row-count="4" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="5" vgap="5">
     <margin top="0" left="0" bottom="0" right="0"/>
     <constraints>
-      <xy x="20" y="20" width="395" height="723"/>
+      <xy x="20" y="20" width="1006" height="723"/>
     </constraints>
     <properties>
+      <minimumSize width="400" height="400"/>
       <name value="Music Player"/>
+      <preferredSize width="400" height="400"/>
     </properties>
     <border type="etched" title="Music Player" title-justification="2" title-position="1">
       <font/>
       <title-color color="-16777216"/>
     </border>
     <children>
-      <grid id="f672e" layout-manager="FlowLayout" hgap="5" vgap="0" flow-align="1">
+      <grid id="f672e" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="1">
         <constraints>
-          <grid row="0" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="1" fill="0" indent="0" use-parent-layout="false"/>
+          <grid row="0" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="1" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties/>
         <border type="none"/>
         <children>
+          <component id="6c28e" class="javax.swing.JCheckBox" binding="shuffleCheckBox">
+            <constraints/>
+            <properties>
+              <text value="Shuffle"/>
+            </properties>
+          </component>
           <component id="7cda8" class="javax.swing.JButton" binding="loadMusicButton">
             <constraints/>
             <properties>
@@ -48,7 +56,7 @@
       </grid>
       <scrollpane id="43d29">
         <constraints>
-          <grid row="2" column="0" row-span="1" col-span="2" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+          <grid row="2" column="0" row-span="1" col-span="3" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties/>
         <border type="etched" title="Musics" title-justification="1" title-position="2">
@@ -65,17 +73,88 @@
           </component>
         </children>
       </scrollpane>
-      <grid id="1a588" layout-manager="FlowLayout" hgap="5" vgap="0" flow-align="0">
+      <grid id="1a588" layout-manager="GridBagLayout">
         <constraints>
-          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="2" indent="0" use-parent-layout="false"/>
+          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties/>
         <border type="none"/>
         <children>
-          <component id="6c28e" class="javax.swing.JCheckBox" binding="shuffleCheckBox">
-            <constraints/>
+          <component id="de05a" class="javax.swing.JLabel" binding="minsLabel">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+              <gridbag weightx="0.0" weighty="0.0"/>
+            </constraints>
             <properties>
-              <text value="Shuffle"/>
+              <horizontalAlignment value="0"/>
+              <text value="0"/>
+            </properties>
+          </component>
+          <component id="9a44" class="javax.swing.JLabel" binding="secsLabel">
+            <constraints>
+              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+              <gridbag weightx="0.0" weighty="0.0"/>
+            </constraints>
+            <properties>
+              <horizontalAlignment value="0"/>
+              <text value="00"/>
+            </properties>
+          </component>
+          <component id="1c665" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+              <gridbag weightx="0.0" weighty="0.0"/>
+            </constraints>
+            <properties>
+              <horizontalAlignment value="0"/>
+              <text value=":"/>
+            </properties>
+          </component>
+          <component id="78d7" class="javax.swing.JSlider" binding="songDurationSlider">
+            <constraints>
+              <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+              <gridbag weightx="0.0" weighty="0.0"/>
+            </constraints>
+            <properties>
+              <enabled value="false"/>
+              <value value="0"/>
+            </properties>
+          </component>
+        </children>
+      </grid>
+      <grid id="c4bb3" layout-manager="GridBagLayout">
+        <constraints>
+          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="aacc3" class="javax.swing.JSlider" binding="volumeSlider">
+            <constraints>
+              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+              <gridbag weightx="0.0" weighty="0.0"/>
+            </constraints>
+            <properties>
+              <enabled value="true"/>
+              <majorTickSpacing value="1"/>
+              <maximum value="100"/>
+              <minorTickSpacing value="1"/>
+              <orientation value="0"/>
+              <paintLabels value="false"/>
+              <paintTicks value="false"/>
+              <paintTrack value="true"/>
+              <snapToTicks value="false"/>
+              <toolTipText value="Volume"/>
+              <visible value="true"/>
+            </properties>
+          </component>
+          <component id="a4941" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+              <gridbag weightx="0.0" weighty="0.0"/>
+            </constraints>
+            <properties>
+              <text value="Volume"/>
             </properties>
           </component>
         </children>
