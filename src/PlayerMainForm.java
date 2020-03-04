@@ -28,6 +28,7 @@ public class PlayerMainForm {
     private HashMap<String, String> musicList = new HashMap<>();
     private BasicPlayer player;
     private double currentSongDuration;
+    private int interruptedAtDuration;
 
     private Thread soundDurationCheck;
 
@@ -59,7 +60,7 @@ public class PlayerMainForm {
                 else if (player.getStatus() == 1) {
                     pauseButton.setText("Pause");
                     player.resume();
-                    soundDurationCheck = soundDurationSliderThread();
+                    soundDurationCheck = soundDurationSliderThread(interruptedAtDuration);
                     soundDurationCheck.start();
                 }
             } catch (BasicPlayerException ex) {
@@ -161,7 +162,7 @@ public class PlayerMainForm {
         if (soundDurationCheck != null) {
             soundDurationCheck.interrupt();
         }
-        soundDurationCheck = soundDurationSliderThread();
+        soundDurationCheck = soundDurationSliderThread(0);
         soundDurationCheck.start();
         songDurationSlider.setMaximum((int) currentSongDuration);
         player.open(f);
@@ -209,14 +210,14 @@ public class PlayerMainForm {
         });
     }
 
-    public Thread soundDurationSliderThread() {
+    public Thread soundDurationSliderThread(int currentTime) {
         return new Thread(() -> {
-            int atTime = 0;
+            int atTime = currentTime;
             while (currentSongDuration > 0) {
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    interruptedAtDuration = atTime;
                     break;
                 }
                 atTime += 1;
